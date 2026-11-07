@@ -1,0 +1,25 @@
+# Publication safeguards. These patterns keep matching untracked files out of Git.
+.venv/
+__pycache__/
+*.py[cod]
+*.TMP
+*.tmp
+*.bak
+*~
+*.backup
+*.keylog
+*keylog*
+*tls-keys*
+*session-secret*
+*session-key*
+*.pem
+*.key
+*.p12
+*.pfx
+# Preserve originals locally; use only the opaque-redacted copies in docs.
+/captures/login-request-response.png
+/captures/local-storage-token.png
+/captures/authenticated-request.png
+/captures/login-response-headers.png
+# Animated material was sampled, not reviewed frame-by-frame.
+/captures/labs-1-2.gif
