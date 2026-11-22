@@ -2,7 +2,7 @@
 
 **Asad Ali Hassan** — Stage 1 networking and web-authentication learning portfolio.
 
-I completed all six lab checkpoints using Ubuntu WSL2 on Windows, Docker Desktop, my own OWASP Juice Shop, Windows Wireshark and Burp Suite Community. All lab checkpoints are passed. The packet-summary exercise is implemented and tested. These files are published on a feature branch with an open pull request. That pull request is not merged, and this publication does not update `main`. Final portfolio sign-off remains outstanding. This publication does not mark a broader roadmap as complete.
+I completed all six lab checkpoints using Ubuntu WSL2 on Windows, Docker Desktop, my own OWASP Juice Shop, Windows Wireshark and Burp Suite Community. All lab checkpoints are passed. The packet-summary exercise is implemented and tested. This work is merged into `main` (pull request #1), and Stage 1 of my roadmap is complete. On 22 November 2026 I added follow-up hardening, described below, and CI passes on `main`.
 
 ## What I captured and learned
 
@@ -57,7 +57,7 @@ The script reads files only: no sniffing, packets sent, TLS keys or elevated pri
 
 Tested 7 November 2026 (Europe/London): `dns.pcap` had 2 packets and 1 DNS query; `tcp.pcap` had 35 packets, 1 observed handshake candidate and 1 plaintext GET; `tls.pcap` had 23 packets, 1 observed handshake candidate and 0 decoded HTTP requests. The TCP capture also contains an earlier partial connection/keepalives, not just the curl exchange.
 
-During publication of this branch, `scripts/pcap_summary.py` was checked with `python3 -m py_compile` and run again under Scapy 2.8.0 against the three included captures, in an isolated environment. The safe totals matched the results above. That rerun did not decrypt TLS.
+When I first published this work, `scripts/pcap_summary.py` was checked with `python3 -m py_compile` and run again under Scapy 2.8.0 against the three included captures, in an isolated environment. The safe totals matched the results above. That rerun did not decrypt TLS.
 
 ## Hardening added on 22 Nov 2026
 
@@ -97,6 +97,6 @@ Four publication copies use opaque black boxes for credential/token value region
 
 Original screenshots are preserved, but `.gitignore` excludes the four authentication originals in favour of `-redacted.png` copies. The Labs 1–2 GIF was sampled rather than reviewed frame-by-frame, so it is excluded pending full review. Network addresses, MAC addresses and public certificates are not treated as credentials, though they can disclose environment metadata.
 
-Keep key logs, resumption/session secrets, backups and private keys out of publication. `.gitignore` is a safeguard, not access control and not a substitute for checking files before sharing. This snapshot is committed on a feature branch and proposed in a pull request. The pull request is not merged, and this publication does not update `main`.
+Keep key logs, resumption/session secrets, backups and private keys out of publication. `.gitignore` is a safeguard, not access control and not a substitute for checking files before sharing. GitHub Actions also runs a gitleaks scan of the full Git history on every push, and I run the same check as a pre-commit hook.
 
-The lab notes keep my original first-person explanations and checkpoint answers, including the wording I wrote before this branch existed. This README is the snapshot status for the published branch.
+The lab notes keep my original first-person explanations and checkpoint answers, including the wording I wrote before I published them. This README describes the current state of `main`.
