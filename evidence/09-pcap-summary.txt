@@ -1,0 +1,26 @@
+# pcap_summary.py on the three committed captures, 22 Nov 2026 (Europe/London). Metadata only.
+$ python scripts/pcap_summary.py captures/tcp.pcap captures/dns.pcap captures/tls.pcap
+Capture summary:
+  #16 SYN ::1:48630 -> ::1:3000
+  #17 SYN-ACK ::1:3000 -> ::1:48630
+  #18 ACK completing observed handshake candidate
+  #19 plaintext HTTP GET /
+  Totals: packets=35, dns_queries=0, syn=1, syn_ack=1, handshake_candidates=1, http_requests=1, http_paths_omitted=0, pending_expired=0, pending_unfinished=0, tcp_payload_bytes=10579, tls_443_bytes_out=0, tls_443_bytes_in=0
+  TLS content is encrypted; no key loading/decryption. HTTP is segment-local, not stream-reassembled.
+  SYN/ACK matches are candidates, not proof of application success; missing packets/retransmits affect results.
+  Pending SYNs expire after 10s of capture time; byte counts are TCP payload lengths only.
+Capture summary:
+  #1 DNS query github.com type=1
+  Totals: packets=2, dns_queries=1, syn=0, syn_ack=0, handshake_candidates=0, http_requests=0, http_paths_omitted=0, pending_expired=0, pending_unfinished=0, tcp_payload_bytes=0, tls_443_bytes_out=0, tls_443_bytes_in=0
+  TLS content is encrypted; no key loading/decryption. HTTP is segment-local, not stream-reassembled.
+  SYN/ACK matches are candidates, not proof of application success; missing packets/retransmits affect results.
+  Pending SYNs expire after 10s of capture time; byte counts are TCP payload lengths only.
+Capture summary:
+  #1 SYN 172.31.240.109:53802 -> 172.66.147.243:443
+  #2 SYN-ACK 172.66.147.243:443 -> 172.31.240.109:53802
+  #3 ACK completing observed handshake candidate
+  Totals: packets=23, dns_queries=0, syn=1, syn_ack=1, handshake_candidates=1, http_requests=0, http_paths_omitted=0, pending_expired=0, pending_unfinished=0, tcp_payload_bytes=8255, tls_443_bytes_out=1735, tls_443_bytes_in=6520
+  TLS content is encrypted; no key loading/decryption. HTTP is segment-local, not stream-reassembled.
+  SYN/ACK matches are candidates, not proof of application success; missing packets/retransmits affect results.
+  Pending SYNs expire after 10s of capture time; byte counts are TCP payload lengths only.
+exit code: 0

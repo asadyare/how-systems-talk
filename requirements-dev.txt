@@ -1,0 +1,4 @@
+# Test and maintenance tools only; the summary script itself needs requirements.txt.
+pytest>=8
+Pillow>=11
+cryptography>=44

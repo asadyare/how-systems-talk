@@ -23,3 +23,4 @@ __pycache__/
 /captures/login-response-headers.png
 # Animated material was sampled, not reviewed frame-by-frame.
 /captures/labs-1-2.gif
+.pytest_cache/

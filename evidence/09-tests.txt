@@ -1,0 +1,51 @@
+# pytest, 22 Nov 2026 (Europe/London), Python 3.12.16, fresh venv from requirements.txt + requirements-dev.txt
+$ python -m pytest -q -rA
+PASSED tests/test_metadata.py::test_clean_images_pass
+PASSED tests/test_metadata.py::test_png_text_and_jpeg_exif_are_caught_and_stripped
+PASSED tests/test_metadata.py::test_clean_file_left_unchanged
+PASSED tests/test_pcap_summary.py::test_route_label_strips_query_and_fragment[/rest/user/login?token=abc-/rest/user/login]
+PASSED tests/test_pcap_summary.py::test_route_label_strips_query_and_fragment[/#frag-/]
+PASSED tests/test_pcap_summary.py::test_route_label_strips_query_and_fragment[/rest/user/whoami#x?y-/rest/user/whoami]
+PASSED tests/test_pcap_summary.py::test_route_label_strips_query_and_fragment[/admin-None]
+PASSED tests/test_pcap_summary.py::test_route_label_strips_query_and_fragment[/rest/user/login/extra-None]
+PASSED tests/test_pcap_summary.py::test_allowlisted_route_shown_after_query_stripped
+PASSED tests/test_pcap_summary.py::test_unknown_path_omitted_and_counted
+PASSED tests/test_pcap_summary.py::test_query_token_never_printed
+PASSED tests/test_pcap_summary.py::test_handshake_completes_and_nothing_left_pending
+PASSED tests/test_pcap_summary.py::test_fin_or_rst_clears_pending[R]
+PASSED tests/test_pcap_summary.py::test_fin_or_rst_clears_pending[F]
+PASSED tests/test_pcap_summary.py::test_fin_or_rst_clears_pending[RA]
+PASSED tests/test_pcap_summary.py::test_fin_or_rst_clears_pending[FA]
+PASSED tests/test_pcap_summary.py::test_rst_reply_leaves_nothing_unfinished
+PASSED tests/test_pcap_summary.py::test_timeout_uses_capture_time_not_wall_clock
+PASSED tests/test_pcap_summary.py::test_late_ack_after_timeout_is_not_a_handshake
+PASSED tests/test_pcap_summary.py::test_tracker_expire_is_pure_capture_time
+PASSED tests/test_pcap_summary.py::test_byte_counts_per_direction
+PASSED tests/test_pcap_summary.py::test_ethernet_padding_not_counted
+PASSED tests/test_pcap_summary.py::test_missing_file_fixed_error_no_filename
+PASSED tests/test_pcap_summary.py::test_corrupt_file_fixed_error_no_bytes
+PASSED tests/test_tls_check.py::test_self_signed_certificate_fails
+PASSED tests/test_tls_check.py::test_hostname_mismatch_fails_even_with_trusted_ca
+PASSED tests/test_tls_check.py::test_valid_chain_and_name_passes
+PASSED tests/test_tls_check.py::test_context_keeps_verification_on_and_tls12_minimum
+PASSED tests/test_tls_check.py::test_no_insecure_option
+PASSED tests/test_tls_check.py::test_connection_refused_gives_fixed_message
+PASSED tests/test_tls_check.py::test_rejects_odd_hostnames
+31 passed, 1 deselected in 1.14s
+
+$ python scripts/check_metadata.py captures
+Checked 10 image(s): clean
+exit code: 0
+
+# Regression proof: each fix removed on purpose, then restored
+| Fix removed on purpose | Test(s) that failed |
+|---|---|
+| `http_paths_omitted` increment | test_unknown_path_omitted_and_counted |
+| `?`/`#` cut before allowlist match | test_route_label_strips_query_and_fragment (3 cases), test_allowlisted_route_shown_after_query_stripped |
+| Pending entry cleared on FIN/RST | test_fin_or_rst_clears_pending (R, F, RA, FA), test_rst_reply_leaves_nothing_unfinished |
+| Capture-time expiry call | test_timeout_uses_capture_time_not_wall_clock, test_late_ack_after_timeout_is_not_a_handshake |
+| Ethernet padding subtraction | test_ethernet_padding_not_counted |
+| Inbound/outbound 443 split | test_byte_counts_per_direction |
+| Hostname check (check_hostname=False) | test_hostname_mismatch_fails_even_with_trusted_ca, test_context_keeps_verification_on_and_tls12_minimum |
+After restoring every fix: 31 passed, 1 deselected (network test).
+Not provable by breaking: removing the explicit TLS 1.2 minimum changed nothing, because Python 3.10+ already defaults to TLS 1.2 as the minimum. The line stays to make the intent explicit.

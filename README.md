@@ -38,7 +38,9 @@ The localhost login flow did not use TLS; my separate example.com test did. Loca
 - `captures/`: original evidence plus clearly named opaque-redacted publication copies.
 - [burp/login-flow.md](burp/login-flow.md): detailed observed authentication walkthrough.
 - [scripts/pcap_summary.py](scripts/pcap_summary.py): offline educational metadata summary.
-- [requirements.txt](requirements.txt): Scapy dependency; [.gitignore](.gitignore): future publication safeguards.
+- [scripts/tls_check.py](scripts/tls_check.py): certificate and hostname check; [scripts/check_metadata.py](scripts/check_metadata.py) and [scripts/strip_metadata.py](scripts/strip_metadata.py): screenshot metadata check and clean-up.
+- `tests/`: pytest tests for the scripts; `evidence/`: saved output from 22 Nov 2026.
+- [requirements.txt](requirements.txt): Scapy dependency; [requirements-dev.txt](requirements-dev.txt): test tools; [.gitignore](.gitignore): future publication safeguards.
 
 ## Run the packet-summary exercise in Ubuntu WSL
 
@@ -56,6 +58,38 @@ The script reads files only: no sniffing, packets sent, TLS keys or elevated pri
 Tested 7 November 2026 (Europe/London): `dns.pcap` had 2 packets and 1 DNS query; `tcp.pcap` had 35 packets, 1 observed handshake candidate and 1 plaintext GET; `tls.pcap` had 23 packets, 1 observed handshake candidate and 0 decoded HTTP requests. The TCP capture also contains an earlier partial connection/keepalives, not just the curl exchange.
 
 During publication of this branch, `scripts/pcap_summary.py` was checked with `python3 -m py_compile` and run again under Scapy 2.8.0 against the three included captures, in an isolated environment. The safe totals matched the results above. That rerun did not decrypt TLS.
+
+## Hardening added on 22 Nov 2026
+
+After a design review, I closed the gaps where my answers went further than my code.
+
+| Gap | What was added | Proof |
+|---|---|---|
+| Omitted paths were not counted | `SAFE_ROUTES` is now a module constant. `?` and `#` were already cut before the allowlist match; requests whose route is not on the list now add to `http_paths_omitted`. | `tests/test_pcap_summary.py` |
+| Half-open handshakes never aged out | FIN/RST already cleared pending entries. Pending SYNs now expire after `--handshake-timeout` seconds (default 10) of **capture time**, not wall-clock time. Totals show `pending_expired` and `pending_unfinished`. | `tests/test_pcap_summary.py` |
+| No byte counts | `tcp_payload_bytes`, plus `tls_443_bytes_out` (client to server) and `tls_443_bytes_in` (server to client). Lengths only, never content. Ethernet padding is not counted. | `tests/test_pcap_summary.py`, `evidence/09-pcap-summary.txt` |
+| TLS checks lived only in my notes | `scripts/tls_check.py` uses `ssl.create_default_context()` with TLS 1.2 as the minimum. It verifies the chain and the hostname, and has no option to turn verification off. | `tests/test_tls_check.py` (local self-signed and wrong-name servers fail), `evidence/09-tls-check.txt` |
+| No secret scanning | gitleaks pre-commit hook (`.pre-commit-config.yaml`) and a `secret-scan` CI job over the full Git history, with `--redact`. | `evidence/09-gitleaks-git.txt` |
+| No metadata check on screenshots | `scripts/check_metadata.py` fails if any image in `captures/` has EXIF or PNG text chunks; it runs in CI. `scripts/strip_metadata.py` removes them. | None of the 10 committed PNGs had EXIF or text chunks, so no image was changed. |
+
+The pcap totals for the three committed captures are unchanged from my 7 November results; only the new counters were added.
+
+### Run the checks
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+python -m pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest -q                       # offline tests; certificates are made in a temp folder at run time
+python -m pytest -q -m network            # optional live check against example.com
+python scripts/pcap_summary.py --handshake-timeout 10 captures/*.pcap
+python scripts/tls_check.py example.com
+python scripts/check_metadata.py captures
+pip install pre-commit && pre-commit install   # gitleaks scans staged changes before each commit
+```
+
+`PASS` from `tls_check.py` means the connection reached a server holding a valid certificate for that name. It does not mean the site is trustworthy.
+
+CI (`.github/workflows/ci.yml`) runs with a read-only token: a `secret-scan` job (gitleaks in `git` mode on the full history, using the official Docker image pinned by version and digest) and a `tests` job (Python 3.12, pytest, metadata check).
 
 ## Evidence and redaction review
 

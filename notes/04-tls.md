@@ -105,3 +105,7 @@ I captured my own controlled HTTPS request to example.com, using tcpdump in WSL 
 > Wireshark can read the HTTPS connection now because I supplied it with the TLS session keys needed to decrypt the captured traffic.
 
 I did not break TLS: the capture alone lacks those session secrets. I must keep the key log private and out of any portfolio publication. The packet-summary script intentionally does not load keys or decrypt TLS.
+
+## Backed by code (added 22 Nov 2026)
+
+The checks I did by hand with `openssl s_client` are now in [`scripts/tls_check.py`](../scripts/tls_check.py). It uses `ssl.create_default_context()` (chain and hostname verification on, TLS 1.2 minimum) and prints only the TLS version, cipher, certificate names, issuer, expiry and PASS/FAIL. Tests in [`tests/test_tls_check.py`](../tests/test_tls_check.py) prove a self-signed certificate and a wrong hostname both fail. Output from 22 Nov 2026: [`evidence/09-tls-check.txt`](../evidence/09-tls-check.txt).
